@@ -102,6 +102,27 @@ object FunctionalTest {
 
     implicit def ParentToC(parent: Parent) = parent.c
 
+    implicit def ForwardChildToParent[ParentType](child: Child[ParentType]) = { child.parent }
+
+    // def m(x: T): R = macro implRef
+    // def assert(cond: Boolean, msg: Any) = macro Asserts.assertImpl
+
+    abstract class Child[ParentType](val parent: ParentType) {}
+
+    case class BankAccount(money: Int) {
+        def lulu() = println("lulu")
+    }
+
+    case class SavingsBankAccount(override val parent: BankAccount = new BankAccount(0))
+            extends Child(parent) {}
+
+
+    //implicit def AttachChildToParent[ParentType]
+    //(newParent: ParentType, child: Child[ParentType]) = { child.parent = newParent }
+
+    //implicit def ForwardChildToParent[ParentType](child: Child[ParentType]) = { child.parent }
+
+
     /* // case to case inheritance is prohibited.
     case class DD() extends D() {
         override def minus = "override-DD"
@@ -136,6 +157,9 @@ object FunctionalTest {
         listOfAdaptables.foldLeft(addable.baseCase)(addable.append)
 
     def main(args: Array[String]) {
+
+        val savingsBankAccount = new SavingsBankAccount()
+        savingsBankAccount.lulu() // This method is forwarded from subclass BankAccount.
 
         val list123 = List(1,2,3) // Note for performance reasons this should be mutable ListBuffer.
         val sum123 = sum(list123)
