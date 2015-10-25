@@ -83,8 +83,29 @@ object FunctionalTest {
     sealed case class B(val number: Double) extends Z { def minus = "b" }
     // sealed allows compiler to make assumptions/inferences about possible subclasses.
     sealed case class C(override val number: Int = 6) extends A(number) {
-        override def minus = "override"
+        override def minus = "override-C"
     }
+
+    class D(val otherNumber: Int = 7) extends C() {
+        override def minus = "override-D"
+    }
+
+    case class Parent(c:C = new C()) {
+        def coolio() = println("Monkey Patching number: " + c.number)
+    }
+
+    /**
+     * This monkey patches C into being type Parent.
+     * Instances of C now have method "coolio"
+     */
+    implicit def CtoParent(c: C) = new Parent(c)
+
+    implicit def ParentToC(parent: Parent) = parent.c
+
+    /* // case to case inheritance is prohibited.
+    case class DD() extends D() {
+        override def minus = "override-DD"
+    }*/
 
     trait Monoid[T] {
         def baseCase: T
@@ -123,16 +144,24 @@ object FunctionalTest {
         val sumXYZ = sum(listXYZ)
         println("Sum of elements X,Y,Z is: " + sumXYZ) // "XYZ"
 
+        val pp = new Parent()
+        println("Parent gets from delegate C: " + pp.number)
+
         //val immutableA = new A(5) // Case classes have no inheritance.
         val immutableB = new B(2.5)
        // println("A minus: " + immutableA.minus)
         println("B minus: " + immutableB.minus)
         println("B val: " + immutableB.number)
-        val immutableC = new C()
+        val immutableC = new C(7)
         println("C minus: " + immutableC.minus)
+        immutableC.coolio() // This method was monkey patched.
         println("C val: " + immutableC.number)
         val bCopy = immutableB.copy(number = 77.6)
         println("B copy: " + bCopy.number + "\n")
+        val dd = new D()
+        println("D number/type: " + dd.number + " " + dd.getClass.getCanonicalName)
+        val cc = dd.copy(number = 55)
+        println("D copied to C number/type: " + cc.number + " " + cc.getClass.getCanonicalName)
 
         def printTerm(term: Z) {
             term match {
