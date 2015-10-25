@@ -1,0 +1,93 @@
+package Package
+// ExecutionContext is like a thread pool/executor. Promise is for callback on future value.
+import scala.concurrent.{ ExecutionContext, Promise }
+import scala.concurrent._
+// Success/Failure for futures
+import scala.util.{Try, Success, Failure}
+
+
+/**
+ * Created by john on 10/24/15.
+ */
+object FunctionalTest {
+    // 1. not Currying - it just returns a anonymous function with predefined body/algorithm
+    def add1(a:Int) = { b:Int => a + b } // use anonymous function, that expect b:Int as param and use "a" from parent-function
+    // 1.1
+
+
+    // 2. Currying - it does not return a function - it returns an Int result.
+    // It expects 2nd parameter to be passed,
+    // but if that is not provided - it returns a function that expects this parameter
+    def add2(a:Int)(b:Int) = {a + b}
+
+    // Composition means making 1 function out of 2 functions.
+    def compose(func1: (String) => String, func2: (String) => String)(str: String): String = {
+        val str1 = func1(str)
+        val str2 = func2(str1)
+        return str2
+    }
+
+    /**
+     * "Option" should be used instead of null check.
+     * If you leave out a "None" case, the method does nothing rather than exploding.
+     */
+    def printSomething(something: Option[String]) = {
+        something match {
+            case Some(maybe) => println(something.get)
+            case None => println("Fuck it.")
+        }
+    }
+    // Same thing as above, but more consice.
+    def printSomething2(something: Option[String]) = {
+        println(something.getOrElse("Fuck it."))
+    }
+
+    /**
+     * I don't know how to use futures.
+     */
+    /*
+    def doSomethingInFuture(): Future[String] = {
+        return new Future[String] {
+            override def isCompleted: Boolean = ???
+
+            override def onComplete[U](f: (Try[String]) => U)(implicit executor: ExecutionContext): Unit = ???
+
+            override def value: Option[Try[String]] = ???
+
+            @throws[Exception](classOf[Exception])
+            override def result(atMost: Duration)(implicit permit: CanAwait): String = ???
+
+            @throws[InterruptedException](classOf[InterruptedException])
+            @throws[TimeoutException](classOf[TimeoutException])
+            override def ready(atMost: Duration)(implicit permit: CanAwait): this.type = ???
+        }
+    }
+
+     // Apparently you can do something when the future returns a value (callback)
+    def getAndUseFuture() = {
+        val myFuture = doSomethingInFuture()
+        myFuture onComplete {
+            case Success(posts) => for (post <- posts) println(post)
+            case Failure(t) => println("An error has occured: " + t.getMessage)
+        }
+    }
+    */
+
+    def main(args: Array[String]) {
+        println("Added 5 and 6 to get: " + add1(5)(6))
+        println("Added 5 and 6 to get: " + add2(5)(6))
+        val halfAddition = add1(5)
+        val result = halfAddition(6)
+        println("Added 5 and 6 to get: " + result)
+
+        val toUpperCase = (str: String) => {str.toUpperCase}
+        val toReverse = (str: String) => {str.reverse}
+        val toUpperCaseAndReverse = compose(toUpperCase, toReverse)("hello")
+        println("\"hello\" to upper case and reverse is: " + toUpperCaseAndReverse)
+
+        printSomething(Option("hi"))
+        printSomething(None)
+        printSomething2(Option("lalala"))
+        printSomething2(None)
+    }
+}
