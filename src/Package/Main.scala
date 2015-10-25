@@ -1,5 +1,7 @@
 package Package
+
 import JavaPackage.Print
+
 /**
  * Created by john on 10/24/15.
  */
@@ -10,7 +12,7 @@ object Main {
    * Set Modules > Sources to set only the src directory as a source directory.
    * Right click > Run - should work after applying the above two changes.
    */
-  def main (args: Array[String]){
+  def main(args: Array[String]) {
     print("Hello World")
 
     // Set the current thread name to "Main_Thread" for printout.
